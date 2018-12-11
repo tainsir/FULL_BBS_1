@@ -1,0 +1,56 @@
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <div class="col-md-10 col-md-offset-1">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="">博客园</a>
+            </div>
+
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="#">文章 <span class="sr-only">(current)</span></a></li>
+                    <li><a href="#">随笔</a></li>
+                </ul>
+                {% if ret %}
+                    <ul class="nav navbar-nav navbar-right">
+                        <li><a href="{% url 'home' %}">{{ user }}</a></li>
+
+                        <li class="dropdown">
+                            <img src="/media/{{ user.avatar }}" alt="" width="35" height="35"
+                                 style="margin-top: 7px;border-radius: 50%" class="dropdown-toggle"
+                                 data-toggle="dropdown" id="dropdownMenu1">
+                            <ul class="dropdown-menu" id="dropDownCur" style="font-size: 12px">
+                                {% if user.blog_id %}
+                                    <li><a href="{% url 'blog' user.blog.site_name %}">个人站点</a></li>
+                                {% else %}
+                                    <li><a href="{% url 'create_blog' %}">个人站点</a></li>
+                                {% endif %}
+
+                                <li><a href="{% url 'set_password' %}">修改密码</a></li>
+                                <li><a href="{% url 'modify_head' %}">修改头像</a></li>
+                                <li><a href="{% url 'logout' %}">注销</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                {% else %}
+                    <ul class="nav navbar-nav navbar-right">
+                        <li><a href="{% url 'register' %}">注册</a></li>
+                        <li><a href="{% url 'login' %}">登录</a></li>
+                    </ul>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</nav>
+
+<script>
+    $("#dropdownMenu1").hover(
+        function () {
+            $("#dropDownCur").show();
+        });
+    $("#dropDownCur").hover(function () {
+        $(this).show();
+    }, function () {
+        $(this).hide();
+    });
+</script>

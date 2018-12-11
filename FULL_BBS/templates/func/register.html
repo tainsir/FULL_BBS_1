@@ -1,0 +1,87 @@
+{% extends 'func/master_mask.html' %}
+
+{% block master_mask %}
+    <h1>用户注册</h1>
+    <hr>
+    <form id="form">
+        {% csrf_token %}
+        {% for my_form in my_forms %}
+            <div class="form-group">
+                <label for="{{ my_form.auto_id }}">{{ my_form.label }}</label>
+                {{ my_form }}
+            </div>
+            <span id="span_{{ my_form.auto_id }}" style="color: red;float: right"></span>
+        {% endfor %}
+        <div class="form-group">
+            <label for="my_file">头像
+                <img src="/media/avatar/default.jpg" id="img_file" alt="" width="80" height="80"
+                     style="margin-left: 10px;border-radius: 50%">
+            </label>
+            <input type="file" id="my_file" style="display: none">
+        </div>
+    </form>
+    <input type="button" value="注册" class="btn btn-primary" id="btn">
+    <a href="{% url 'home' %}" class="btn btn-primary pull-right">取消注册</a>
+{% endblock %}
+
+{% block script %}
+    <script>
+        $('#my_file').change(function () {
+            let file_obj = $('#my_file')[0].files[0];
+            let filereader = new FileReader();
+            filereader.readAsDataURL(file_obj);
+            filereader.onload = function () {
+                $('#img_file').attr('src', filereader.result)
+            };
+        });
+        $('#btn').click(function () {
+            let formdata = new FormData();
+            let form = $('#form').serializeArray();
+            $.each(form, function (index, obj) {
+                formdata.append(obj.name, obj.value);
+            });
+            formdata.append('my_file', $('#my_file')[0].files[0]);
+            $.ajax({
+                url: '/register/',
+                type: 'post',
+                data: formdata,
+                processData: false,
+                contentType: false,
+                success: function (data) {
+                    let ret = data.status;
+                    if (ret == 100) {
+                        location.href = '/login/'
+                    } else {
+                        let error = data.msg;
+                        $.each(error, function (key, value) {
+                            $('#span_id_' + key).text(value)
+                        });
+                        $.each(error, function (key, value) {
+                            $('#id_' + key).change(function () {
+                                $('#span_id_' + key).text('')
+                            });
+                        })
+                    }
+                }
+            })
+        });
+        $('#id_username').blur(function () {
+            $.ajax({
+                url: '/register/',
+                type: 'get',
+                data: {'username': $('#id_username').val()},
+                success: function (data) {
+                    let ret = data.status;
+                    if (ret == 200) {
+                        let error = data.msg;
+                        $('#span_id_username').text(error.username);
+                        $('#id_username').change(function () {
+                            $('#span_id_username').text('')
+                        })
+                    }
+                }
+            })
+        });
+
+    </script>
+{% endblock %}

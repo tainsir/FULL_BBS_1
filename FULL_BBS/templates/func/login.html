@@ -1,0 +1,75 @@
+{% extends 'func/master_mask.html' %}
+
+{% block master_mask %}
+    <h1>用户登录</h1>
+    <hr>
+    <form>
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="username">用户名：</label>
+            <input type="text" id="username" class="form-control">
+        </div>
+
+        <div class="form-group">
+            <label for="password">密码：</label>
+            <input type="password" id="password" class="form-control">
+        </div>
+
+        <div class="form-group">
+            <label for="valid_code">验证码：</label>
+            <div class="row">
+                <div class="col-md-3">
+                    <div>
+                        <input type="text" id="valid_code" class="form-control">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <img height="33" width="150" src="{% url 'get_valid_code' %}" alt="" id="img"
+                         onclick="this.setAttribute('src','{% url 'get_valid_code' %}'+Math.random())"
+                         title="点击刷新验证码" style="cursor: pointer">
+                </div>
+                <div class="col-md-5">
+                    <span id="span" style="color: red;font-size: 20px;">
+
+                    </span>
+                </div>
+            </div>
+
+        </div>
+        <input type="button" value="登录" class="btn btn-primary" id="btn">
+        <a href="{% url 'home' %}" class="btn btn-primary pull-right">回首页</a>
+    </form>
+
+{% endblock %}
+{% block script %}
+    <script>
+        $('#btn').click(function () {
+            let post_data = {
+                'username': $('#username').val(),
+                'password': $('#password').val(),
+                'valid_code': $('#valid_code').val(),
+            };
+            let pos = JSON.stringify(post_data);
+            $.ajax({
+                url: '/login/',
+                type: 'post',
+                data: pos,
+                headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                contentType: 'application/json',
+                dataType: 'json',
+                success: function (data) {
+                    let ret = data.status;
+                    if (ret == 100) {
+                        location.href = '/'
+                    } else {
+                        let error = data.msg;
+                        console.log(error);
+                        $('#span').text(error)
+
+                    }
+                }
+
+            })
+        });
+    </script>
+{% endblock %}

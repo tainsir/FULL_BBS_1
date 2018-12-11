@@ -1,0 +1,35 @@
+<div style="text-align: center">
+    <a href="/media/{{ user.avatar }}">
+        <img src="/media/{{ user.avatar }}" alt="" width="250" height="250" style="margin-top: 7px;border-radius: 50%">
+    </a>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">文章分类</h3>
+    </div>
+
+    <ul class="list-group">
+        {% for category in category_list %}
+            <li class="list-group-item">
+                <span class="badge">{{ category.coun }}</span>
+                <a href="/{{ site_name }}/category/{{ category.pk }}">{{ category.title }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">标签分类</h3>
+    </div>
+
+    <ul class="list-group">
+        {% for tag in tag_list %}
+            <li class="list-group-item">
+                <span class="badge">{{ tag.coun }}</span>
+                <a href="/{{ site_name }}/tag/{{ tag.pk }}">{{ tag.title }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+</div>

@@ -1,0 +1,25 @@
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="{% url 'home' %}">博客园</a>
+            <a class="navbar-brand" href="{% url 'blog' site_name %}">首页</a>
+            {% if ret %}
+                <a class="navbar-brand" href="{% url 'backend' %}">管理</a>
+                <a class="navbar-brand" href="">联系</a>
+            {% else %}
+                <a class="navbar-brand" href="{% url 'login' %}">管理</a>
+                <a class="navbar-brand" href="{% url 'login' %}">联系</a>
+            {% endif %}
+        </div>
+
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav navbar-right">
+
+
+                <li><a href="">随笔- 0&nbsp;</a></li>
+                <li><a href="">文章- {{ count }}</a></li>
+                <li><a href="">评论- 0&nbsp;</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>

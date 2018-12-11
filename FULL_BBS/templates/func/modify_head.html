@@ -1,0 +1,47 @@
+{% extends 'func/master_mask.html' %}
+
+{% block master_mask %}
+    <h1>修改头像</h1>
+    <hr>
+    <form enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="my_file">头像
+                <img src="/media/{{ user.avatar }}" id="img_file" alt="" width="200" height="200"
+                     style="margin-left: 10px;border-radius: 50%">
+            </label>
+
+            <input type="file" id="my_file" style="display: none">
+        </div>
+    </form>
+    <input type="button" value="提交" class="btn btn-primary" id="btn">
+    <a href="{% url 'home' %}" class="btn btn-primary pull-right">取消修改</a>
+{% endblock %}
+
+{% block script %}
+    <script>
+        $('#my_file').change(function () {
+            let file_obj = $('#my_file')[0].files[0];
+            let filereader = new FileReader();
+            filereader.readAsDataURL(file_obj);
+            filereader.onload = function () {
+                $('#img_file').attr('src', filereader.result)
+            };
+        });
+        $('#btn').click(function () {
+            let formdata = new FormData();
+            formdata.append('my_file', $('#my_file')[0].files[0]);
+            $.ajax({
+                url: '/modify_head/',
+                type: 'post',
+                headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                data: formdata,
+                processData: false,
+                contentType: false,
+                success: function (data) {
+                    location.href = '/'
+                }
+            })
+        })
+    </script>
+{% endblock %}

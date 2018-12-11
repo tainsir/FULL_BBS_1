@@ -1,0 +1,48 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+.body {
+    margin: 15px 8px;
+}
+
+.main_header {
+    position: relative;
+}
+
+.site_title {
+    margin-top: 30px;
+    padding: 4px 4px 15px 80px;
+    width: 500px;
+    height: 70px;
+    font-size: 36px;
+    font-weight: bold;
+}
+
+.site_title a {
+    text-decoration: none;
+}
+
+.blog_title {
+    width: 70px;
+    height: 70px;
+    padding: 30px 10px 10px;
+    font-size: 20px;
+    font-weight: bold;
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.left_container {
+    padding: 40px 0 0;
+}
+
+.left_container .panel-body {
+    border-top: none !important;
+}
+
+.main_container {
+    padding: 0;
+}

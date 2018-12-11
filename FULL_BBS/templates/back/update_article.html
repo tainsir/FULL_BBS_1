@@ -1,0 +1,94 @@
+{% extends 'back/admin_base.html' %}
+
+{% block home %}
+    <div class="add-article">
+        <div class="add-header">
+            <span>编辑文章</span>
+        </div>
+        <div class="add-wrap">
+            <form>
+                <div class="form-group">
+                    <label for="title">标题</label>
+                    <input type="text" name="title" id="title" class="form-control">
+                </div>
+                <div class="form-group">
+                    <b>内容</b>(TinyMCE编辑器，不支持拖放/粘贴上传图片)
+                    <textarea name="content" id="editor_id" cols="30" rows="10"></textarea>
+                </div>
+                <strong>选择分类</strong>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        {% for category in category_list %}
+
+                            <label class="radio-inline" style="margin-left: 40px">
+                                <input name="category" id="inlineRadioOptions" type="radio" value="{{ category.pk }}"/>
+                                {{ category.title }}
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                <strong>添加标签</strong>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        {% for tag in tag_list %}
+                            <label class="checkbox-inline" style="margin-left: 40px">
+                                <input name="tag" id="inlineCheckbox{{ forloop.counter }}" type="checkbox"
+                                       value="{{ tag.pk }}" style="zoom: 100%"/>
+                                {{ tag.title }}
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+            </form>
+            <button id="btn" class="btn btn-danger">提交</button>
+            <a href="{% url 'backend' %}" class="btn btn-danger">退出编辑</a>
+        </div>
+
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script>
+        $(function () {
+            $.ajax({
+                url: '/get_article/' +{{ pk }},
+                type: 'get',
+                success: function (data) {
+                    $('#title').val(data.title);
+                    editor.html(data.content);
+                    let category_id = data.category[0];
+                    $('input:radio[value=' + category_id + ']').attr('checked', 'checked');
+                    $.each(data.tag_list, function (i, v) {
+                        $("input[type='checkbox'][name=tag][value=" + v + "]").attr("checked", true);
+                    });
+
+                }
+            })
+        });
+        $('#btn').click(function () {
+            let category = $('input:radio:checked').val();
+            let tag_list = [];
+            $("input:checkbox[name='tag']:checked").each(function () {
+                tag_list.push($(this).val())
+            });
+            $.ajax({
+                url: '/update_article/' +{{ pk }},
+                type: 'post',
+                headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                data: {
+                    'title': $('#title').val(),
+                    'content': editor.html(),
+                    'category': category,
+                    'tag_list': tag_list,
+                },
+
+                success: function (data) {
+                    console.log(data);
+                    if (data.status == 100) {
+                        location.href = '/backend/'
+                    }
+                }
+            })
+        })
+    </script>
+{% endblock %}

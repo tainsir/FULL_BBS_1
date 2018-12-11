@@ -1,0 +1,132 @@
+{% extends 'back/admin_base.html' %}
+
+{% block css %}
+    <style>
+        .inp {
+            border: none;
+            background-color: transparent;
+        }
+    </style>
+{% endblock %}
+
+{% block category_page %}
+    <button class="btn btn-danger glyphicon glyphicon-plus" id="add" style="margin: 10px"></button>
+    <a href="{% url 'backend' %}" class="btn btn-danger glyphicon glyphicon-home"></a>
+    <table class="table table-striped" id="table">
+        <thead>
+        <tr>
+            <th>编号</th>
+            <th>分类名称</th>
+            <th>删除</th>
+        </tr>
+        </thead>
+        <tbody id="tbody">
+        {% for category in category_list %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>
+                    <input type="text" name="category" class="inp" id="{{ category.pk }}" value="{{ category.title }}"/>
+                </td>
+                <td>
+                    <a data-toggle="modal" data-target="#myModal_{{ forloop.counter }}" style="cursor: pointer">删除</a>
+                    <!-- Modal -->
+                    <div class="modal fade" id="myModal_{{ forloop.counter }}" tabindex="-1" role="dialog"
+                         aria-labelledby="myModalLabel">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                            aria-hidden="true">&times;</span></button>
+                                    <h4 class="modal-title" id="myModalLabel">警告！！！</h4>
+                                </div>
+                                <div class="modal-body">
+                                    您确认删除该分类及该分类下的所有文章？
+                                </div>
+                                <div class="modal-footer">
+                                    <a href="{% url 'delete_category' category.pk %}" class="btn btn-primary">确认</a>
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+
+
+{% endblock %}
+
+{% block script %}
+    <script type="text/javascript">
+        $(function () {
+            let num = {{ category_list.count }} +1;
+            $("#add").click(function () {
+                let tr = '';
+                if (num == 1) {
+                    tr = `
+                    <tbody>
+                    <tr>
+                    <td>${num}</td>
+                    <td><input type="text" name="category" class="inp" id="new"/></td>
+                    <td><a href="">删除</a></td>
+                    </tr>
+                    </tbody>
+                    `;
+                    $("table").append(tr);
+                } else {
+                    tr = `
+                        <tr>
+                        <td>${num}</td>
+                        <td><input type="text" name="category" class="inp" id="new"/></td>
+                        <td><a href="">删除</a></td>
+                        </tr>
+                        `;
+                    $("#tbody").append(tr);
+                    $('#new').focus();
+                }
+                $('#new').blur(function () {
+                    console.log($(this).val());
+                    $.ajax({
+                        url: '/redact_category/',
+                        type: 'post',
+                        data: {'category': $(this).val()},
+                        headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                        success: function (data) {
+                            if (data.status == 100) {
+                                location.reload()
+                            } else {
+                                alert(data.msg)
+                                location.reload()
+                            }
+                        }
+                    })
+                })
+            });
+
+            $('.inp').change(function () {
+                let id = $(this).attr('id');
+                $('#' + id).blur(function () {
+                    console.log('blur');
+                    $.ajax({
+                        url: '/redact_category/',
+                        type: 'post',
+                        data: {'id': id, 'category': $(this).val()},
+                        headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                        success: function (data) {
+                            if (data.status == 100) {
+                                location.reload()
+                            } else {
+                                alert(data.msg)
+                            }
+                        }
+                    })
+                })
+            });
+        });
+    </script>
+
+{% endblock %}

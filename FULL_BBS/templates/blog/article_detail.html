@@ -1,0 +1,201 @@
+{% extends 'blog/base.html' %}
+
+{% block css %}
+    <link rel="stylesheet" href="/static/css/article_detail.css">
+
+{% endblock %}
+
+{% block article_content %}
+    <div>
+        {{ article.content|safe }}
+    </div>
+
+    <hr>
+    {# 点赞点踩 #}
+    <div class="clearfix">
+        <div id="div_digg">
+            <div class="diggit" onclick="up_and_down(true);">
+                <span class="diggnum" id="digg_count">{{ article.up_count }}</span>
+            </div>
+            <div class="buryit" onclick="up_and_down(false);">
+                <span class="burynum" id="bury_count">{{ article.down_count }}</span>
+            </div>
+            <span id="span_msg" style="color: red;display: inline-block;cursor: pointer">
+            </span>
+        </div>
+    </div>
+    <hr>
+    {# 评论列表 #}
+    {% if comment_list %}
+        <h4>评论列表 </h4>
+    {% endif %}
+    <div>
+        <ul class="list-group content_content">
+            {% for comment in comment_list %}
+                <p>
+                    {% if  username == comment.user.username %}
+                        <span class="pull-right remove" comment_id="{{ comment.pk }}" style="cursor: pointer">
+                            &nbsp;删除&nbsp;
+                        </span>
+                    {% else %}
+                        <span class="pull-right replay" username="{{ comment.user.username }}"
+                              comment_id="{{ comment.pk }}" style="cursor: pointer">
+                            &nbsp;回复
+                        </span>
+                    {% endif %}
+
+                    <a href="">#{{ forloop.counter }}楼</a>
+                    <span>{{ comment.create_time|date:'Y-m-d H:i:s' }}</span>
+                    <a href="">&nbsp;{{ comment.user.username }}&nbsp;</a>
+                    <img src="/static/icon/xinxi.png" alt="" style="width: 15px;height: 15px">
+                </p>
+                <li class="list-group-item" style="margin-bottom: 20px;">
+                    {% if comment.parent %}
+                        <p class="well">@{{ comment.parent.user.username }}</p>
+                    {% endif %}
+                    {{ comment.content|safe }}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+
+    {# 发表评论 #}
+    {% if ret %}
+        <div>
+            <div class="form-group">
+                <img src="/static/icon/message.png" alt="" style="width: 20px;height: 20px">
+                <span>发表评论</span>
+            </div>
+            <div class="form-group">
+                昵称:
+                <input disabled="disabled" class="author" id="tbCommentAuthor" type="text" size="50"
+                       value="{{ username }}">
+            </div>
+            <div class="form-group">
+                <textarea name="content" id="content" cols="60" rows="10"></textarea>
+            </div>
+            <button class="btn btn-primary submit">提交</button>
+        </div>
+    {% else %}
+        <span>
+            注册用户登录后才能发表评论，请
+            <a href="{% url 'login' %}">登录</a>
+            或
+            <a href="{% url 'register' %}">注册</a>
+            ，
+            <a href="{% url 'home' %}">访问</a>
+            网站首页
+        </span>
+    {% endif %}
+
+
+    <br><br><br><br><br><br><br><br><br><br>
+{% endblock %}
+
+{% block script %}
+    <script>
+        KindEditor.ready(function (K) {
+            window.editor = K.create('#content', {
+                resizeType: 1,
+                items: [
+                    'bold', 'italic', '|', 'link', '|', 'indent', '|', 'code'
+                ]
+            });
+        });
+
+        let pid = '';
+
+        // 点赞点踩
+        function up_and_down(b) {
+            $.ajax({
+                url: '/UpAndDown/',
+                type: 'post',
+                headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                data: {'article_id':{{ article.pk}}, 'is_up': b},
+                success: function (data) {
+                    $('#span_msg').text(data.msg);
+                    if (data.status == 300) {
+                        $('#span_msg').click(function () {
+                            location.href = '/login/'
+                        });
+                    } else {
+                        $('#digg_count').text(data.up_count);
+                        $('#bury_count').text(data.down_count);
+                        setTimeout(function () {
+                            $('#span_msg').text('');
+                        }, 3000)
+                    }
+                }
+            })
+        }
+
+        // 提交评论
+        $('.submit').click(function () {
+            let content = editor.html();
+            console.log(content);
+
+            if (pid) {
+                let index = content.indexOf('\n') + 1;
+                content = content.slice(index)
+            }
+            $.ajax({
+                url: '/commit_comment/',
+                type: 'post',
+                headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                data: {
+                    'article_id':{{ article.pk }},
+                    'content': content,
+                    'pid': pid,
+                },
+                success: function (data) {
+                    console.log(data);
+                    let content = data.content;
+                    let username = data.username;
+                    let h = '';
+                    if (pid) {
+                        pid = '';
+                        h = `
+                        <img src="/static/icon/message.png" alt="" style="width: 20px;height: 20px">
+                        <a href="">&nbsp;${username}:&nbsp;</a>
+                        <p class="well">@${username}</p>
+                        ${content}
+                        `
+                    } else {
+                        h = `
+                        <img src="/static/icon/message.png" alt="" style="width: 20px;height: 20px">
+                        <a href="">&nbsp;${username}:&nbsp;</a>
+                        <li class="list-group-item" style="margin-bottom: 20px;">
+                        ${content}
+                        </li>
+                        `
+
+                    }
+                    $(".content_content").append(h);
+                    editor.html('');
+                }
+            })
+        });
+        $('.replay').click(function () {
+            let username = $(this).attr('username');
+            editor.focus();
+            editor.appendHtml('@' + username + '<p></p>');
+            pid = $(this).attr('comment_id')
+        });
+        $('.remove').click(function () {
+            let comment_id = $(this).attr('comment_id');
+            $.ajax({
+                url: '/remove_comment/',
+                type: 'post',
+                headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                data: {
+                    'article_id':{{ article.pk }},
+                    'comment_id': comment_id,
+                },
+                success: function (data) {
+                    location.reload()
+                }
+            })
+        })
+    </script>
+{% endblock %}

@@ -1,0 +1,15 @@
+
+.add-article {
+    padding: 20px;
+}
+
+.add-header {
+    background-color: #e5eef7;
+    font-weight: bold;
+    border-top: 2px solid #aaa;
+    border-bottom: 2px dashed #aaa;
+}
+
+.add-wrap {
+    background-color: #f5f5f5;
+}

@@ -1,0 +1,26 @@
+<div style="margin:10px 50px 20px">
+
+    <h4><a href="/{{ article.blog.site_name }}/article/{{ article.pk }}">{{ article.title }}</a></h4>
+    <div class="media">
+        <div class="media-left">
+            <a href="{{ article.blog.site_name }}">
+                <img class="media-object" src="/media/{{ article.blog.userinfo.avatar }}" alt="" width="50" height="50">
+            </a>
+        </div>
+        <div class="media-body" style="font-size: 12px">
+            {{ article.desc }}
+        </div>
+        <div class="media-bottom" style="margin-top: 10px">
+            <span><a href="{{ article.blog.site_name }}">{{ article.blog.userinfo.username }}</a></span>
+            <span style="font-size: 12px">发布与 {{ article.create_time }} </span>
+            <span class="glyphicon glyphicon-comment" style="margin-left: 10px"><a
+                    href="">评论({{ article.comment_count }})</a></span>
+            <span class="glyphicon glyphicon-thumbs-up" style="margin-left: 10px"><a
+                    href="">点赞({{ article.up_count }})</a></span>
+        </div>
+        <hr>
+    </div>
+
+</div>
+
+
